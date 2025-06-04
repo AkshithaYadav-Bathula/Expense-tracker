@@ -1,9 +1,15 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .models import Expense
+from .forms import ExpenseForm
 
 def home(request):
-    expenses = Expense.objects.all().order_by('-date')  # latest first
-    return render(request, 'tracker/home.html', {'expenses': expenses})
-
-# This view retrieves all Expense objects from the database, ordered by date in descending order.
-# It then renders the 'home.html' template, passing the expenses as context.
+    if request.method == 'POST':
+        form = ExpenseForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('/')
+    else:
+        form = ExpenseForm()
+    
+    expenses = Expense.objects.all()
+    return render(request, 'tracker/home.html', {'form': form, 'expenses': expenses})
